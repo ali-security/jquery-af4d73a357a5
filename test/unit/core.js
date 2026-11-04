@@ -1387,6 +1387,87 @@ test("jQuery.parseHTML", function() {
 	ok( jQuery.parseHTML("<#if><tr><p>This is a test.</p></tr><#/if>") || true, "Garbage input should not cause error" );
 });
 
+test( "jQuery.parseHTML(<a href>) - gh-2965", function() {
+	expect( 1 );
+
+	var html = "<a href='test.html'></a>",
+		href = jQuery.parseHTML( html )[ 0 ].href;
+
+	ok( /\/test\.html$/.test( href ), "href is not lost after parsing anchor" );
+});
+
+test( "jQuery.parseHTML - parsed nodes can still be used in the page", function() {
+	expect( 3 );
+
+	var nodes = jQuery.parseHTML( "<div class='parseHTML-inserted'><b>bold</b></div>" );
+
+	jQuery( "<div></div>" ).append( nodes ).appendTo( "#qunit-fixture" );
+	equal( jQuery( "#qunit-fixture div.parseHTML-inserted b" ).text(), "bold", "Parsed nodes can be inserted into the page" );
+	equal( jQuery.parseHTML( "<span></span>" )[ 0 ].nodeName.toLowerCase(), "span", "Single tags are still parsed" );
+	strictEqual( jQuery.parseHTML( "<i>x</i>", document )[ 0 ].ownerDocument, document, "An explicit context is still used" );
+});
+
+// This XSS test is optional, as it will only pass when `document.implementation.createHTMLDocument`
+// is implemented.
+if ( jQuery.isFunction( document.implementation && document.implementation.createHTMLDocument ) ) {
+	asyncTest( "jQuery.parseHTML doesn't run inline event handlers (sonatype-2014-0026)", function() {
+		expect( 5 );
+
+		var i,
+			// Context-less calls must not run the inline event handler
+			calls = [
+				[ "jQuery.parseHTML( html )", function( html ) {
+					jQuery.parseHTML( html );
+				} ],
+				[ "jQuery.parseHTML( html, true )", function( html ) {
+					jQuery.parseHTML( html, true );
+				} ],
+				[ "jQuery.parseHTML( html, null, true )", function( html ) {
+					jQuery.parseHTML( html, null, true );
+				} ],
+				[ "jQuery.parseHTML( html, false )", function( html ) {
+					jQuery.parseHTML( html, false );
+				} ]
+			],
+			executed = [];
+
+		Globals.register("parseHTMLXSS");
+		window.parseHTMLXSS = function( index ) {
+			executed[ index ] = true;
+		};
+
+		for ( i = 0; i < calls.length; i++ ) {
+			calls[ i ][ 1 ]( "<img src='parseHTML-xss-" + i + "' onerror='parseHTMLXSS(" + i + ")'>" );
+		}
+
+		// Control: an explicit live-document context still parses in that
+		// document (as jQuery( html ) does), so the handler does fire there.
+		// This proves the payload is live in this browser.
+		jQuery.parseHTML( "<img src='parseHTML-xss-" + i + "' onerror='parseHTMLXSS(" + i + ")'>", document );
+
+		window.setTimeout(function() {
+			for ( i = 0; i < calls.length; i++ ) {
+				ok( !executed[ i ], "onerror event handler has not been called: " + calls[ i ][ 0 ] );
+			}
+			ok( executed[ calls.length ], "onerror event handler is called with an explicit document context (control)" );
+			start();
+		}, 2000 );
+	});
+}
+
+testIframeWithCallback( "jQuery.parseHTML doesn't run inline event handlers - bundled jQuery 1.9.1 (src/sizzle/test/jquery.js) (sonatype-2014-0026)", "core/parseHTMLSizzleCopy.html", function( result ) {
+	expect( 8 );
+
+	strictEqual( result.version, "1.9.1", "src/sizzle/test/jquery.js is jQuery 1.9.1" );
+	strictEqual( result.supportCreateHTMLDocument, true, "1.9.1: jQuery.support.createHTMLDocument" );
+	deepEqual( result.executed, [], "1.9.1: context-less jQuery.parseHTML ran no inline event handler" );
+	strictEqual( result.controlFired, true, "1.9.1: the same markup parsed with an explicit document context does run it (control)" );
+	ok( /\/test\.html$/.test( result.anchorHref ), "1.9.1: href is not lost after parsing anchor (gh-2965)" );
+	strictEqual( result.insertedText, "bold", "1.9.1: parsed nodes can be inserted into the page" );
+	strictEqual( result.singleTag, "span", "1.9.1: single tags are still parsed" );
+	strictEqual( result.explicitContextOwner, true, "1.9.1: an explicit context is still used" );
+});
+
 test("jQuery.parseJSON", function() {
 	expect( 20 );
 

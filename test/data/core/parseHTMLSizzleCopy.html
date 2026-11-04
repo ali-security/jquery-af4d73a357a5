@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Bundled jQuery copy: jQuery.parseHTML doesn't run inline event handlers (sonatype-2014-0026)</title>
+	<script src="../../../src/sizzle/test/jquery.js"></script>
+	<script>
+		window.sizzlejQuery = jQuery.noConflict( true );
+	</script>
+</head>
+<body>
+	<script>
+		function check( $ ) {
+			var i, nodes,
+				// Context-less calls must not run the inline event handler
+				calls = [
+					[ "jQuery.parseHTML( html )", function( html ) {
+						$.parseHTML( html );
+					} ],
+					[ "jQuery.parseHTML( html, true )", function( html ) {
+						$.parseHTML( html, true );
+					} ],
+					[ "jQuery.parseHTML( html, null, true )", function( html ) {
+						$.parseHTML( html, null, true );
+					} ],
+					[ "jQuery.parseHTML( html, false )", function( html ) {
+						$.parseHTML( html, false );
+					} ]
+				],
+				result = {
+					version: $.fn.jquery,
+					supportCreateHTMLDocument: $.support.createHTMLDocument,
+					controlFired: false,
+					executed: []
+				};
+
+			function payload( index ) {
+				return "<img src='parseHTML-xss-" + index + "' onerror='xss(" + index + ")'>";
+			}
+
+			window.xss = function( index ) {
+				if ( index === calls.length ) {
+					result.controlFired = true;
+				} else {
+					result.executed.push( calls[ index ][ 0 ] );
+				}
+			};
+
+			for ( i = 0; i < calls.length; i++ ) {
+				calls[ i ][ 1 ]( payload( i ) );
+			}
+
+			// Control: an explicit live-document context still parses in that
+			// document (as jQuery( html ) does), so the handler does fire there.
+			// This proves the payload is live in this browser.
+			$.parseHTML( payload( calls.length ), document );
+
+			// Parsed URLs still resolve against the page URL (gh-2965)
+			result.anchorHref = $.parseHTML( "<a href='test.html'></a>" )[ 0 ].href;
+
+			// Parsed nodes still work once inserted into the page
+			nodes = $.parseHTML( "<div class='parsed'><b>bold</b></div>" );
+			$( "<div></div>" ).append( nodes ).appendTo( document.body );
+			result.insertedText = $( "div.parsed b" ).text();
+			result.singleTag = $.parseHTML( "<span></span>" )[ 0 ].nodeName.toLowerCase();
+			result.explicitContextOwner = $.parseHTML( "<i>x</i>", document )[ 0 ].ownerDocument === document;
+
+			return result;
+		}
+
+		var result = check( window.sizzlejQuery );
+
+		// Give the missing images time to fail and fire any injected onerror handler
+		setTimeout(function() {
+			window.parent.iframeCallback( result );
+		}, 1500 );
+	</script>
+</body>
+</html>
