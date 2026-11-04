@@ -568,7 +568,7 @@ test("animate duration 0", function() {
 	});
 	this.clock.tick( 200 );
 
-	$elem = jQuery("<div />");
+	$elem = jQuery("<div></div>");
 	$elem.show(0, function(){
 		ok(true, "Show callback with no duration");
 	});
@@ -1517,9 +1517,9 @@ test( "animate should set display for disconnected nodes", function() {
 		},
 		$divTest = jQuery("<div>test</div>"),
 		// parentNode = null
-		$divEmpty = jQuery("<div/>"),
-		$divNone = jQuery("<div style='display: none;'/>"),
-		$divInline = jQuery("<div style='display: inline;'/>"),
+		$divEmpty = jQuery("<div></div>"),
+		$divNone = jQuery("<div style='display: none;'></div>"),
+		$divInline = jQuery("<div style='display: inline;'></div>"),
 		clock = this.clock;
 
 	strictEqual( $divTest.show()[ 0 ].style.display, "block", "set display with show() for element with parentNode = document fragment" );
@@ -1538,7 +1538,7 @@ test( "animate should set display for disconnected nodes", function() {
 			jQuery("<div>test</div>"),
 
 			// parentNode = null
-			jQuery("<div/>")
+			jQuery("<div></div>")
 
 		], function() {
 			var callback = [function () {

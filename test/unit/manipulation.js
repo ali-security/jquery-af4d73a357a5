@@ -89,9 +89,9 @@ function testText( valueObj ) {
 	equal( $multipleElements.eq(1).text(), expected, "text() updates multiple elements (#11809)" );
 
 	// Prevent memory leaks #11809
-	$childDiv = jQuery( "<div/>" );
+	$childDiv = jQuery( "<div></div>" );
 	$childDiv.data("leak", true);
-	$parentDiv = jQuery( "<div/>" );
+	$parentDiv = jQuery( "<div></div>" );
 	$parentDiv.append( $childDiv );
 	$parentDiv.text("Dry off");
 
@@ -244,10 +244,10 @@ function testAppend( valueObj ) {
 		strictEqual( e.message || e, undefined, message );
 	}
 
-	jQuery("<fieldset/>").appendTo("#form").append( valueObj("<legend id='legend'>test</legend>") );
+	jQuery("<fieldset></fieldset>").appendTo("#form").append( valueObj("<legend id='legend'>test</legend>") );
 	t( "Append legend", "#legend", [ "legend" ] );
 
-	$map = jQuery("<map/>").append( valueObj("<area id='map01' shape='rect' coords='50,50,150,150' href='http://www.jquery.com/' alt='jQuery'>") );
+	$map = jQuery("<map></map>").append( valueObj("<area id='map01' shape='rect' coords='50,50,150,150' href='http://www.jquery.com/' alt='jQuery'>") );
 
 	equal( $map[ 0 ].childNodes.length, 1, "The area was inserted." );
 	equal( $map[ 0 ].firstChild.nodeName.toLowerCase(), "area", "The area was inserted." );
@@ -267,7 +267,7 @@ function testAppend( valueObj ) {
 		ok( jQuery.parseHTML( "<" + name + "/>" ).length, name + " wrapped correctly" );
 	});
 
-	jQuery("#table colgroup").append( valueObj("<col/>") );
+	jQuery("#table colgroup").append( valueObj("<col></col>") );
 	equal( jQuery("#table colgroup col").length, 1, "Append col" );
 
 	jQuery("#form")
@@ -275,12 +275,12 @@ function testAppend( valueObj ) {
 		.append( valueObj("<select id='appendSelect2'><option>Test</option></select>") );
 	t( "Append Select", "#appendSelect1, #appendSelect2", [ "appendSelect1", "appendSelect2" ] );
 
-	equal( "Two nodes", jQuery("<div />").append( "Two", " nodes" ).text(), "Appending two text nodes (#4011)" );
-	equal( jQuery("<div />").append( "1", "", 3 ).text(), "13", "If median is false-like value, subsequent arguments should not be ignored" );
+	equal( "Two nodes", jQuery("<div></div>").append( "Two", " nodes" ).text(), "Appending two text nodes (#4011)" );
+	equal( jQuery("<div></div>").append( "1", "", 3 ).text(), "13", "If median is false-like value, subsequent arguments should not be ignored" );
 
 	// using contents will get comments regular, text, and comment nodes
 	j = jQuery("#nonnodes").contents();
-	d = jQuery("<div/>").appendTo("#nonnodes").append( j );
+	d = jQuery("<div></div>").appendTo("#nonnodes").append( j );
 
 	equal( jQuery("#nonnodes").length, 1, "Check node,textnode,comment append moved leaving just the div" );
 	equal( d.contents().length, 3, "Check node,textnode,comment append works" );
@@ -297,12 +297,12 @@ function testAppend( valueObj ) {
 	$radioChecked.trigger("click");
 	$radioUnchecked[ 0 ].checked = false;
 
-	jQuery("<div/>").insertBefore($radioParent).append($radioParent);
+	jQuery("<div></div>").insertBefore($radioParent).append($radioParent);
 
 	equal( $radioChecked[ 0 ].checked, true, "Reappending radios uphold which radio is checked" );
 	equal( $radioUnchecked[ 0 ].checked, false, "Reappending radios uphold not being checked" );
 
-	equal( jQuery("<div/>").append( valueObj("option<area/>") )[ 0 ].childNodes.length, 2, "HTML-string with leading text should be processed correctly" );
+	equal( jQuery("<div></div>").append( valueObj("option<area></area>") )[ 0 ].childNodes.length, 2, "HTML-string with leading text should be processed correctly" );
 }
 
 test( "append(String|Element|Array<Element>|jQuery)", function() {
@@ -578,7 +578,7 @@ test( "appendTo(jQuery)", function() {
 	jQuery("#select1").appendTo("#foo");
 	t( "Append select", "#foo select", [ "select1" ] );
 
-	div = jQuery("<div/>").on( "click", function() {
+	div = jQuery("<div></div>").on( "click", function() {
 		ok( true, "Running a cloned click." );
 	});
 	div.appendTo("#qunit-fixture, #moretests");
@@ -586,7 +586,7 @@ test( "appendTo(jQuery)", function() {
 	jQuery("#qunit-fixture div").last().trigger("click");
 	jQuery("#moretests div").last().trigger("click");
 
-	div = jQuery("<div/>").appendTo("#qunit-fixture, #moretests");
+	div = jQuery("<div></div>").appendTo("#qunit-fixture, #moretests");
 
 	equal( div.length, 2, "appendTo returns the inserted elements" );
 
@@ -595,7 +595,7 @@ test( "appendTo(jQuery)", function() {
 	ok( jQuery("#qunit-fixture div").last().hasClass("test"), "appendTo element was modified after the insertion" );
 	ok( jQuery("#moretests div").last().hasClass("test"), "appendTo element was modified after the insertion" );
 
-	div = jQuery("<div/>");
+	div = jQuery("<div></div>");
 	jQuery("<span>a</span><b>b</b>").filter("span").appendTo( div );
 
 	equal( div.children().length, 1, "Make sure the right number of children were inserted." );
@@ -895,7 +895,7 @@ test( "before(no-op)", function() {
 	expect( 2 );
 
 	var set;
-	set = jQuery("<div/>").before("<span>test</span>");
+	set = jQuery("<div></div>").before("<span>test</span>");
 	equal( set[ 0 ].nodeName.toLowerCase(), "div", "Insert before a disconnected node should be a no-op" );
 	equal( set.length, 1, "Insert the element before the disconnected node. should be a no-op" );
 });
@@ -914,8 +914,8 @@ test( ".before() and .after() disconnected node", function() {
 
   expect(2);
   
-  equal( jQuery("<input type='checkbox'/>").before("<div/>").length, 1, "before() on disconnected node is no-op" );
-	equal( jQuery("<input type='checkbox'/>").after("<div/>").length, 1, "after() on disconnected node is no-op" );
+  equal( jQuery("<input type='checkbox'/>").before("<div></div>").length, 1, "before() on disconnected node is no-op" );
+	equal( jQuery("<input type='checkbox'/>").after("<div></div>").length, 1, "after() on disconnected node is no-op" );
 });
 
 test( "insert with .before() on disconnected node last", function() {
@@ -924,7 +924,7 @@ test( "insert with .before() on disconnected node last", function() {
 
   var expectedBefore = "This is a normal link: bugaYahoo";
 
-  jQuery("#yahoo").add("<span/>").before("<b>buga</b>");
+  jQuery("#yahoo").add("<span></span>").before("<b>buga</b>");
 	equal( jQuery("#en").text(), expectedBefore, "Insert String before with disconnected node last" );
 });
 
@@ -934,7 +934,7 @@ test( "insert with .before() on disconnected node first", function() {
 
   var expectedBefore = "This is a normal link: bugaYahoo";
 
-	jQuery("<span/>").add("#yahoo").before("<b>buga</b>");
+	jQuery("<span></span>").add("#yahoo").before("<b>buga</b>");
 	equal( jQuery("#en").text(), expectedBefore, "Insert String before with disconnected node first" );
 });
 
@@ -944,7 +944,7 @@ test( "insert with .before() on disconnected node last", function() {
 
   var expectedAfter = "This is a normal link: Yahoobuga";
 
-	jQuery("#yahoo").add("<span/>").after("<b>buga</b>");
+	jQuery("#yahoo").add("<span></span>").after("<b>buga</b>");
 	equal( jQuery("#en").text(), expectedAfter, "Insert String after with disconnected node last" );
 });
 
@@ -954,7 +954,7 @@ test( "insert with .before() on disconnected node last", function() {
 
   var expectedAfter = "This is a normal link: Yahoobuga";
 
-	jQuery("<span/>").add("#yahoo").after("<b>buga</b>");
+	jQuery("<span></span>").add("#yahoo").after("<b>buga</b>");
 	equal( jQuery("#en").text(), expectedAfter, "Insert String after with disconnected node first" );
 });
 
@@ -1074,7 +1074,7 @@ test( ".after(disconnected node)", function() {
 
   expect( 2 );
 
-  var set = jQuery("<div/>").before("<span>test</span>");
+  var set = jQuery("<div></div>").before("<span>test</span>");
 	equal( set[ 0 ].nodeName.toLowerCase(), "div", "Insert after a disconnected node should be a no-op" );
 	equal( set.length, 1, "Insert the element after the disconnected node should be a no-op" );
 });
@@ -1157,10 +1157,10 @@ function testReplaceWith( val ) {
 	deepEqual( jQuery("#anchor1").contents().get(), [ tmp ], "Replace text node with element" );
 
 
-	tmp = jQuery("<div/>").appendTo("#qunit-fixture").on( "click", function() {
+	tmp = jQuery("<div></div>").appendTo("#qunit-fixture").on( "click", function() {
 		ok( true, "Newly bound click run." );
 	});
-	y = jQuery("<div/>").appendTo("#qunit-fixture").on( "click", function() {
+	y = jQuery("<div></div>").appendTo("#qunit-fixture").on( "click", function() {
 		ok( false, "Previously bound click run." );
 	});
 	child = y.append("<b>test</b>").find("b").on( "click", function() {
@@ -1175,7 +1175,7 @@ function testReplaceWith( val ) {
 	child.trigger("click"); // Shouldn't be run
 
 
-	y = jQuery("<div/>").appendTo("#qunit-fixture").on( "click", function() {
+	y = jQuery("<div></div>").appendTo("#qunit-fixture").on( "click", function() {
 		ok( false, "Previously bound click run." );
 	});
 	child2 = y.append("<u>test</u>").find("u").on( "click", function() {
@@ -1188,14 +1188,14 @@ function testReplaceWith( val ) {
 	child2.trigger("click");
 
 
-	set = jQuery("<div/>").replaceWith( val("<span>test</span>") );
+	set = jQuery("<div></div>").replaceWith( val("<span>test</span>") );
 	equal( set[0].nodeName.toLowerCase(), "div", "No effect on a disconnected node." );
 	equal( set.length, 1, "No effect on a disconnected node." );
 	equal( set[0].childNodes.length, 0, "No effect on a disconnected node." );
 
 
 	child = jQuery("#qunit-fixture").children().first();
-	$div = jQuery("<div class='pathological'/>").insertBefore( child );
+	$div = jQuery("<div class='pathological'></div>").insertBefore( child );
 	$div.replaceWith( $div );
 	deepEqual( jQuery( ".pathological", "#qunit-fixture" ).get(), $div.get(),
 		"Self-replacement" );
@@ -1250,7 +1250,7 @@ test( "replaceWith(string) for more than one element", function() {
 });
 
 test( "Empty replaceWith (#13401; #13596)", 8, function() {
-	var $el = jQuery( "<div/>" ),
+	var $el = jQuery( "<div></div>" ),
 		tests = {
 			"empty string": "",
 			"empty array": [],
@@ -1261,9 +1261,9 @@ test( "Empty replaceWith (#13401; #13596)", 8, function() {
 		};
 
 	jQuery.each( tests, function( label, input ) {
-		$el.html( "<a/>" ).children().replaceWith( input );
+		$el.html( "<a></a>" ).children().replaceWith( input );
 		strictEqual( $el.html(), "", "replaceWith(" + label + ")" );
-		$el.html( "<b/>" ).children().replaceWith(function() { return input; });
+		$el.html( "<b></b>" ).children().replaceWith(function() { return input; });
 		strictEqual( $el.html(), "", "replaceWith(function returning " + label + ")" );
 	});
 });
@@ -1377,7 +1377,7 @@ test( "clone()", function() {
 	div.remove();
 
 	// Verify that cloned children can keep event listeners
-	div = jQuery("<div/>").append([ document.createElement("table"), document.createElement("table") ]);
+	div = jQuery("<div></div>").append([ document.createElement("table"), document.createElement("table") ]);
 	div.find("table").on( "click", function() {
 		ok( true, "Bound event still exists." );
 	});
@@ -1404,7 +1404,7 @@ test( "clone()", function() {
 	div.remove();
 
 	// Test both html() and clone() for <embed> and <object> types
-	div = jQuery("<div/>").html("<embed height='355' width='425' src='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'></embed>");
+	div = jQuery("<div></div>").html("<embed height='355' width='425' src='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'></embed>");
 
 	clone = div.clone( true );
 	equal( clone.length, 1, "One element cloned" );
@@ -1414,7 +1414,7 @@ test( "clone()", function() {
 	// this is technically an invalid object, but because of the special
 	// classid instantiation it is the only kind that IE has trouble with,
 	// so let's test with it too.
-	div = jQuery("<div/>").html("<object height='355' width='425' classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000'>  <param name='movie' value='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'>  <param name='wmode' value='transparent'> </object>");
+	div = jQuery("<div></div>").html("<object height='355' width='425' classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000'>  <param name='movie' value='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'>  <param name='wmode' value='transparent'> </object>");
 
 	clone = div.clone( true );
 	equal( clone.length, 1, "One element cloned" );
@@ -1440,14 +1440,14 @@ test( "clone()", function() {
 	})();
 
 	// and here's a valid one.
-	div = jQuery("<div/>").html("<object height='355' width='425' type='application/x-shockwave-flash' data='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'>  <param name='movie' value='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'>  <param name='wmode' value='transparent'> </object>");
+	div = jQuery("<div></div>").html("<object height='355' width='425' type='application/x-shockwave-flash' data='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'>  <param name='movie' value='http://www.youtube.com/v/3KANI2dpXLw&amp;hl=en'>  <param name='wmode' value='transparent'> </object>");
 
 	clone = div.clone(true);
 	equal( clone.length, 1, "One element cloned" );
 	equal( clone.html(), div.html(), "Element contents cloned" );
 	equal( clone[ 0 ].nodeName.toUpperCase(), "DIV", "DIV element cloned" );
 
-	div = jQuery("<div/>").data({ "a": true });
+	div = jQuery("<div></div>").data({ "a": true });
 	clone = div.clone( true );
 	equal( clone.data("a"), true, "Data cloned." );
 	clone.data( "a", false );
@@ -1539,7 +1539,7 @@ test( "clone() on local XML nodes with html5 nodename", function() {
 
 	expect( 2 );
 
-	var $xmlDoc = jQuery( jQuery.parseXML( "<root><meter /></root>" ) ),
+	var $xmlDoc = jQuery( jQuery.parseXML( "<root><meter></meter></root>" ) ),
 		$meter = $xmlDoc.find( "meter" ).clone();
 
 	equal( $meter[ 0 ].nodeName, "meter", "Check if nodeName was not changed due to cloning" );
@@ -1573,12 +1573,12 @@ function testHtml( valueObj ) {
 		div = jQuery("<div></div>"),
 		fixture = jQuery("#qunit-fixture");
 
-	div.html( valueObj("<div id='parent_1'><div id='child_1'/></div><div id='parent_2'/>") );
+	div.html( valueObj("<div id='parent_1'><div id='child_1'></div></div><div id='parent_2'></div>") );
 	equal( div.children().length, 2, "Found children" );
 	equal( div.children().children().length, 1, "Found grandchild" );
 
 	actual = []; expected = [];
-	tmp = jQuery("<map/>").html( valueObj("<area alt='area'/>") ).each(function() {
+	tmp = jQuery("<map></map>").html( valueObj("<area alt='area'></area>") ).each(function() {
 		expected.push("AREA");
 		actual.push( childNodeNames( this ) );
 	});
@@ -1633,7 +1633,7 @@ function testHtml( valueObj ) {
 	equal( expected.length, 1, "Expecting one parent" );
 	deepEqual( actual, expected, "Found the inserted style element" );
 
-	fixture.html( valueObj("<select/>") );
+	fixture.html( valueObj("<select></select>") );
 	jQuery("#qunit-fixture select").html( valueObj("<option>O1</option><option selected='selected'>O2</option><option>O3</option>") );
 	equal( jQuery("#qunit-fixture select").val(), "O2", "Selected option correct" );
 
@@ -1730,7 +1730,7 @@ test( "html(Function) with incoming value -- jQuery.contents()", function() {
 
 	equal( j.html().replace( / xmlns="[^"]+"/g, "" ).toLowerCase(), "<b>bold</b>", "Check node,textnode,comment with html()" );
 
-	$div = jQuery("<div />");
+	$div = jQuery("<div></div>");
 
 	equal( $div.html(function( i, val ) {
 		equal( val, "", "Make sure the incoming value is correct." );
@@ -1742,7 +1742,7 @@ test( "html(Function) with incoming value -- jQuery.contents()", function() {
 		return 0;
 	}).html(), "0", "Setting a zero as html" );
 
-	$div2 = jQuery("<div/>");
+	$div2 = jQuery("<div></div>");
 	insert = "&lt;div&gt;hello1&lt;/div&gt;";
 	equal( $div2.html(function( i, val ) {
 		equal( val, "", "Make sure the incoming value is correct." );
@@ -2026,7 +2026,7 @@ test( "jQuery.buildFragment - no plain-text caching (Bug #6779)", function() {
 
 	// DOM manipulation fails if added text matches an Object method
 	var i,
-		$f = jQuery( "<div />" ).appendTo( "#qunit-fixture" ),
+		$f = jQuery( "<div></div>" ).appendTo( "#qunit-fixture" ),
 		bad = [ "start-", "toString", "hasOwnProperty", "append", "here&there!", "-end" ];
 
 	for ( i = 0; i < bad.length; i++ ) {
@@ -2162,7 +2162,7 @@ test( "Guard against exceptions when clearing safeChildNodes", function() {
 	var div;
 
 	try {
-		div = jQuery("<div/><hr/><code/><b/>");
+		div = jQuery("<div></div><hr/><code></code><b></b>");
 	} catch(e) {}
 
 	ok( div && div.jquery, "Created nodes safely, guarded against exceptions on safeChildNodes[ -1 ]" );
@@ -2172,11 +2172,11 @@ test( "Ensure oldIE creates a new set on appendTo (#8894)", function() {
 
 	expect( 5 );
 
-	strictEqual( jQuery("<div/>").clone().addClass("test").appendTo("<div/>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after jQuery.clone" );
-	strictEqual( jQuery("<div/>").find("p").end().addClass("test").appendTo("<div/>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after jQuery.fn.find" );
-	strictEqual( jQuery("<div/>").text("test").addClass("test").appendTo("<div/>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after jQuery.fn.text" );
-	strictEqual( jQuery("<bdi/>").clone().addClass("test").appendTo("<div/>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after clone html5 element" );
-	strictEqual( jQuery("<p/>").appendTo("<div/>").end().length, jQuery("<p>test</p>").appendTo("<div/>").end().length, "Elements created with createElement and with createDocumentFragment should be treated alike" );
+	strictEqual( jQuery("<div></div>").clone().addClass("test").appendTo("<div></div>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after jQuery.clone" );
+	strictEqual( jQuery("<div></div>").find("p").end().addClass("test").appendTo("<div></div>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after jQuery.fn.find" );
+	strictEqual( jQuery("<div></div>").text("test").addClass("test").appendTo("<div></div>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after jQuery.fn.text" );
+	strictEqual( jQuery("<bdi></bdi>").clone().addClass("test").appendTo("<div></div>").end().end().hasClass("test"), false, "Check jQuery.fn.appendTo after clone html5 element" );
+	strictEqual( jQuery("<p></p>").appendTo("<div></div>").end().length, jQuery("<p>test</p>").appendTo("<div></div>").end().length, "Elements created with createElement and with createDocumentFragment should be treated alike" );
 });
 
 test( "html() - script exceptions bubble (#11743)", function() {
@@ -2267,7 +2267,7 @@ test( "script evaluation (#11795)", function() {
 			"<script>ok( true, 'evaluated: inner no type' );</script>",
 		"</div>"
 	].join(""));
-	scriptsIn.appendTo( jQuery("<div class='detached'/>") );
+	scriptsIn.appendTo( jQuery("<div class='detached'></div>") );
 	objGlobal.ok = isOk;
 
 	scriptsOut = fixture.append( scriptsIn ).find("script");
@@ -2284,7 +2284,7 @@ test( "script evaluation (#11795)", function() {
 
 	if ( jQuery.ajax ) {
 		Globals.register("testBar");
-		jQuery("#qunit-fixture").append( "<script src='" + url("data/test.js") + "'/>" );
+		jQuery("#qunit-fixture").append( "<script src='" + url("data/test.js") + "'></script>" );
 		strictEqual( window["testBar"], "bar", "Global script evaluation" );
 	} else {
 		ok( true, "No jQuery.ajax" );
@@ -2306,7 +2306,7 @@ test( "jQuery._evalUrl (#12838)", function() {
 		equal( ( input.url || input ).slice( -1 ), expectedArgument, message );
 		expectedArgument++;
 	};
-	jQuery("#qunit-fixture").append("<script src='1'/><script src='2'/>");
+	jQuery("#qunit-fixture").append("<script src='1'></script><script src='2'></script>");
 	equal( expectedArgument, 3, "synchronous execution" );
 
 	message = "custom implementation";
@@ -2315,7 +2315,7 @@ test( "jQuery._evalUrl (#12838)", function() {
 	jQuery.ajax = function( options ) {
 		strictEqual( options, {}, "Unexpected call to jQuery.ajax" );
 	};
-	jQuery("#qunit-fixture").append("<script src='3'/><script src='4'/>");
+	jQuery("#qunit-fixture").append("<script src='3'></script><script src='4'></script>");
 
 	jQuery.ajax = ajax;
 	jQuery._evalUrl = evalUrl;
@@ -2358,7 +2358,7 @@ test( "insertAfter, insertBefore, etc do not work when destination is original e
 test( "Index for function argument should be received (#13094)", 2, function() {
 	var i = 0;
 
-	jQuery("<div/><div/>").before(function( index ) {
+	jQuery("<div></div><div></div>").before(function( index ) {
 		equal( index, i++, "Index should be correct" );
 	});
 
@@ -2380,7 +2380,7 @@ test( "Make sure specific elements with content created correctly (#13232)", 20,
 			thead: "<tr><td>thead</td></tr>",
 			tbody: "<tr><td>tbody</td></tr>",
 			tfoot: "<tr><td>tfoot</td></tr>",
-			colgroup: "<col span='5' />",
+			colgroup: "<col span='5'></col>",
 			caption: "caption",
 			tr: "<td>tr</td>",
 			th: "th",
@@ -2397,7 +2397,7 @@ test( "Make sure specific elements with content created correctly (#13232)", 20,
 		args.push( html );
 	});
 
-	jQuery.fn.append.apply( jQuery("<div/>"), args ).children().each(function( i ) {
+	jQuery.fn.append.apply( jQuery("<div></div>"), args ).children().each(function( i ) {
 		ok( jQuery.nodeName( this, results[ i ] ) );
 	});
 });
@@ -2406,7 +2406,7 @@ test( "Validate creation of multiple quantities of certain elements (#13818)", 4
 	var tags = [ "thead", "tbody", "tfoot", "colgroup", "col", "caption", "tr", "th", "td", "optgroup", "option" ];
 
 	jQuery.each( tags, function( index, tag ) {
-		jQuery( "<" + tag + "/><" + tag + "/>" ).each(function() {
+		jQuery( "<" + tag + "></" + tag + "><" + tag + "></" + tag + ">" ).each(function() {
 			ok( jQuery.nodeName( this, tag ), tag + " empty elements created correctly" );
 		});
 
@@ -2548,4 +2548,134 @@ testIframeWithCallback( "<option>/<optgroup> HTML isn't parsed inside a <select>
 	strictEqual( result.selectOptions, 2, "append(): <option> markup still lands in a <select>" );
 	strictEqual( result.payloads.length, 35, "every payload went through a manipulation method" );
 	deepEqual( result.executed, [], "no sanitized <option>/<optgroup> payload is executed" );
+});
+
+test( "XHTML-style self-closing non-void tags are not expanded (gh-4642)", function() {
+
+	expect( 7 );
+
+	var div = jQuery("<div></div>");
+
+	div.html("<div/><div/>");
+	equal( div.children().length, 1, "html(): one child" );
+	equal( div.children().children().length, 1, "html(): one grandchild" );
+
+	div = jQuery("<div></div>").append("<div/><div/>");
+	equal( div.children().length, 1, "append(): one child" );
+	equal( div.children().children().length, 1, "append(): one grandchild" );
+
+	equal( jQuery("<div/><div/>").length, 1, "jQuery(): one top-level element" );
+	equal( jQuery.parseHTML("<div/><div/>").length, 1, "jQuery.parseHTML(): one top-level element" );
+
+	equal( jQuery("<div></div>").html("<div></div><div></div>").children().length, 2,
+		"html(): explicitly closed tags still give two children" );
+});
+
+test( "jQuery.htmlPrefilter (gh-4642)", function() {
+
+	expect( 5 );
+
+	var div,
+		htmlPrefilter = jQuery.htmlPrefilter,
+		calls = [];
+
+	strictEqual( jQuery.htmlPrefilter("<div/><span/>"), "<div/><span/>",
+		"jQuery.htmlPrefilter returns the HTML string unchanged by default" );
+
+	jQuery.htmlPrefilter = function( html ) {
+		calls.push( html );
+		return htmlPrefilter( html );
+	};
+
+	try {
+		jQuery("<div></div>").html("<b>html</b>");
+		jQuery("<div></div>").append("<b>append</b>");
+		jQuery("<b>jQuery</b><i></i>");
+	} finally {
+		jQuery.htmlPrefilter = htmlPrefilter;
+	}
+
+	equal( jQuery.inArray( "<b>html</b>", calls ) > -1, true, "html() passes the string through jQuery.htmlPrefilter" );
+	equal( jQuery.inArray( "<b>append</b>", calls ) > -1, true, "append() passes the string through jQuery.htmlPrefilter" );
+	equal( jQuery.inArray( "<b>jQuery</b><i></i>", calls ) > -1, true, "jQuery() passes the string through jQuery.htmlPrefilter" );
+
+	div = jQuery("<div></div>").html("<div/><div/>");
+	equal( div.children().length, 1, "restored jQuery.htmlPrefilter keeps self-closing tags as they are" );
+});
+
+test( "Sanitized HTML doesn't get unsanitized", function() {
+
+	var container, i, j, payload,
+		counter = 0,
+		executed = {},
+		payloads = [],
+		templates = [
+			// Thanks to Masato Kinugawa from Cure53 for providing the following test cases.
+			// "xss(#)" is swapped for a per-payload index.
+			"<img alt=\"<x\" title=\"/><img src=url404 onerror=xss(#)>\">",
+			"<img alt=\"\n<x\" title=\"/>\n<img src=url404 onerror=xss(#)>\">",
+			"<style><style/><img src=url404 onerror=xss(#)>",
+			"<xmp><xmp/><img src=url404 onerror=xss(#)>",
+			"<title><title /><img src=url404 onerror=xss(#)>",
+			"<iframe><iframe/><img src=url404 onerror=xss(#)>",
+			"<noframes><noframes/><img src=url404 onerror=xss(#)>",
+			"<noscript><noscript/><img src=url404 onerror=xss(#)>",
+			"<foo\" alt=\"\" title=\"/><img src=url404 onerror=xss(#)>\">",
+			"<img alt=\"<x\" title=\"\" src=\"/><img src=url404 onerror=xss(#)>\">",
+			"<noscript/><img src=url404 onerror=xss(#)>",
+			"<option><style></option></select><img src=url404 onerror=xss(#)></style>",
+			"<template><style></template><img src=url404 onerror=xss(#)>"
+		],
+		methods = [
+			[ "html", function( html ) {
+				jQuery("<div></div>").appendTo( container ).html( html );
+			} ],
+			[ "append", function( html ) {
+				jQuery("<div></div>").appendTo( container ).append( html );
+			} ],
+			[ "jQuery", function( html ) {
+				jQuery( html );
+			} ]
+		];
+
+	expect( templates.length * methods.length );
+
+	Globals.register("xss");
+	window.xss = function( index ) {
+		executed[ index ] = true;
+	};
+
+	container = jQuery("<div></div>").appendTo("#qunit-fixture");
+
+	for ( i = 0; i < templates.length; i++ ) {
+		for ( j = 0; j < methods.length; j++ ) {
+			payload = templates[ i ].replace( "#", counter );
+			payloads.push( methods[ j ][ 0 ] + "( " + payload + " )" );
+			methods[ j ][ 1 ]( payload );
+			counter++;
+		}
+	}
+
+	stop();
+	setTimeout(function() {
+		for ( i = 0; i < payloads.length; i++ ) {
+			ok( !executed[ i ], "Payload #" + i + " isn't executed: " + payloads[ i ] );
+		}
+		start();
+	}, 1000 );
+});
+
+testIframeWithCallback( "XHTML-style self-closing non-void tags are not expanded - bundled jQuery 1.9.1 (src/sizzle/test/jquery.js) (gh-4642)", "manipulation/xhtmlSelfClosingSizzleCopy.html", function( result ) {
+	expect( 10 );
+
+	strictEqual( result.version, "1.9.1", "src/sizzle/test/jquery.js is jQuery 1.9.1" );
+	strictEqual( result.htmlChildren, 1, "html(): one child" );
+	strictEqual( result.htmlGrandchildren, 1, "html(): one grandchild" );
+	strictEqual( result.appendChildren, 1, "append(): one child" );
+	strictEqual( result.appendGrandchildren, 1, "append(): one grandchild" );
+	strictEqual( result.topLevel, 1, "jQuery(): one top-level element" );
+	strictEqual( result.parseHTMLTopLevel, 1, "jQuery.parseHTML(): one top-level element" );
+	strictEqual( result.explicitChildren, 2, "html(): explicitly closed tags still give two children" );
+	strictEqual( result.payloads.length, 39, "every payload went through a manipulation method" );
+	deepEqual( result.executed, [], "no sanitized htmlString executes its payload" );
 });

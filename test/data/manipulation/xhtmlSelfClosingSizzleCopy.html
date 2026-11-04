@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Bundled jQuery copy: XHTML-style self-closing non-void tags are not expanded (gh-4642)</title>
+	<script src="../../../src/sizzle/test/jquery.js"></script>
+	<script>
+		window.sizzlejQuery = jQuery.noConflict( true );
+	</script>
+</head>
+<body>
+	<script>
+		// Thanks to Masato Kinugawa from Cure53 for providing the following test cases.
+		// "xss(#)" is swapped for a per-payload index.
+		var templates = [
+				"<img alt=\"<x\" title=\"/><img src=url404 onerror=xss(#)>\">",
+				"<img alt=\"\n<x\" title=\"/>\n<img src=url404 onerror=xss(#)>\">",
+				"<style><style/><img src=url404 onerror=xss(#)>",
+				"<xmp><xmp/><img src=url404 onerror=xss(#)>",
+				"<title><title /><img src=url404 onerror=xss(#)>",
+				"<iframe><iframe/><img src=url404 onerror=xss(#)>",
+				"<noframes><noframes/><img src=url404 onerror=xss(#)>",
+				"<noscript><noscript/><img src=url404 onerror=xss(#)>",
+				"<foo\" alt=\"\" title=\"/><img src=url404 onerror=xss(#)>\">",
+				"<img alt=\"<x\" title=\"\" src=\"/><img src=url404 onerror=xss(#)>\">",
+				"<noscript/><img src=url404 onerror=xss(#)>",
+				"<option><style></option></select><img src=url404 onerror=xss(#)></style>",
+				"<template><style></template><img src=url404 onerror=xss(#)>"
+			],
+			result;
+
+		function check( $ ) {
+			var div, container, methods, i, j, payload,
+				counter = 0,
+				result = {
+					version: $.fn.jquery,
+					payloads: [],
+					executed: []
+				};
+
+			window.xss = function( index ) {
+				result.executed.push( result.payloads[ index ] );
+			};
+
+			div = $( "<div></div>" ).html( "<div/><div/>" );
+			result.htmlChildren = div.children().length;
+			result.htmlGrandchildren = div.children().children().length;
+
+			div = $( "<div></div>" ).append( "<div/><div/>" );
+			result.appendChildren = div.children().length;
+			result.appendGrandchildren = div.children().children().length;
+
+			result.topLevel = $( "<div/><div/>" ).length;
+			result.parseHTMLTopLevel = $.parseHTML( "<div/><div/>" ).length;
+
+			result.explicitChildren = $( "<div></div>" ).html( "<div></div><div></div>" ).children().length;
+
+			container = $( "<div></div>" ).appendTo( document.body );
+			methods = [
+				[ "html", function( html ) {
+					$( "<div></div>" ).appendTo( container ).html( html );
+				} ],
+				[ "append", function( html ) {
+					$( "<div></div>" ).appendTo( container ).append( html );
+				} ],
+				[ "jQuery", function( html ) {
+					$( html );
+				} ]
+			];
+
+			for ( i = 0; i < templates.length; i++ ) {
+				for ( j = 0; j < methods.length; j++ ) {
+					payload = templates[ i ].replace( "#", counter );
+					result.payloads.push( methods[ j ][ 0 ] + "( " + payload + " )" );
+					methods[ j ][ 1 ]( payload );
+					counter++;
+				}
+			}
+
+			return result;
+		}
+
+		result = check( window.sizzlejQuery );
+
+		// Give the url404 images time to fail and fire any injected onerror handler
+		setTimeout(function() {
+			window.parent.iframeCallback( result );
+		}, 1000 );
+	</script>
+</body>
+</html>
