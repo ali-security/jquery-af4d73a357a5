@@ -1,3 +1,94 @@
 language: node_js
+os: linux
+dist: focal
 node_js:
 - '0.10'
+
+# Seal fork CI. Every leg is listed explicitly under jobs.include (Travis
+# replaces the top-level node_js matrix with it).
+#  - Node 0.10: the project's own `npm test` (= grunt default: jsonlint, build,
+#    jshint, jscs, uglify, dist, compare_size).
+#  - Browser: the real QUnit unit suite (test/index.html, PHP ajax fixtures)
+#    against a freshly built dist/jquery.js in headless Chrome.
+jobs:
+  include:
+    - name: "npm test (grunt) - Node 0.10"
+      node_js: "0.10"
+      before_install:
+        # build/tasks/build.js appends $COMMIT to the embedded version
+        - unset COMMIT
+        # jQuery's devDependencies as of the 2.1.0 release (2014-01-23)
+        - npm config set registry https://time-machines-npm.sealsecurity.io/
+        - npm config set //time-machines-npm.sealsecurity.io/:_authToken 2014-01-23T21:12:47.772000Z
+        # npm 2 only sends the token when always-auth is on
+        - npm config set always-auth true
+        - node --version
+        - npm --version
+      install:
+        - npm install
+      script:
+        - unset COMMIT
+        - npm test
+      after_script:
+        # Hold the job until Travis has archived the test output (log lag).
+        - sh test/seal-wait-for-log.sh grunt
+
+    - name: "QUnit suite - headless Chrome"
+      node_js: "20"
+      # noble for PHP 8.3: the built-in server of focal's PHP 7.4 and jammy's
+      # PHP 8.1.2 can stall under headless Chrome, timing out the ajax module.
+      dist: noble
+      addons:
+        chrome: stable
+        apt:
+          packages:
+            - php-cli
+      before_install:
+        - /usr/bin/php --version
+        - google-chrome --version
+      install:
+        # Build dist/ with the project's own toolchain (grunt on Node 0.10 / npm 2).
+        - unset COMMIT
+        - nvm install 0.10
+        - nvm use 0.10
+        - node --version
+        - npm --version
+        - npm config set registry https://time-machines-npm.sealsecurity.io/
+        - npm config set //time-machines-npm.sealsecurity.io/:_authToken 2014-01-23T21:12:47.772000Z
+        - npm config set always-auth true
+        - npm install
+        - ./node_modules/.bin/grunt
+        # Test driver on a current Node, from the public registry, in its own tree
+        - nvm use 20
+        - node --version
+        - mkdir -p /tmp/driver
+        - cd /tmp/driver && npm init -y && npm install --registry=https://registry.npmjs.org/ puppeteer-core@24
+        - cd "$TRAVIS_BUILD_DIR"
+      before_script:
+        # Multiple workers are load-bearing: single-process php -S starves
+        # the fixture iframes the suite opens.
+        - PHP_CLI_SERVER_WORKERS=10 /usr/bin/php -S 127.0.0.1:8000 -t . > /tmp/php.log 2>&1 &
+        - >-
+          for i in $(seq 1 30); do
+          curl -sf -o /dev/null http://127.0.0.1:8000/test/index.html && break;
+          sleep 1;
+          done
+        - curl -sf -o /dev/null http://127.0.0.1:8000/test/index.html
+      script:
+        # Environment-dependent in current headless Chrome (not jQuery bugs);
+        # the runner prints each reason next to the skipped test.
+        - >-
+          SEAL_CHROME_BIN="$(which google-chrome)"
+          NODE_PATH=/tmp/driver/node_modules
+          SEAL_SKIP_TESTS="ajax: #14379 - jQuery.ajax() on unload =>
+          Chrome refuses the synchronous XHR this test issues from an unload handler (sync XHR during page dismissal is disallowed), so the request never reaches the server ;;
+          offset: fractions (see #7730 and #7885) =>
+          Blink snaps layout positions to 1/64 px, so an offset of 1000 set via .offset() reads back as 999.984375 ;;
+          css: widows & orphans #8936 =>
+          Chrome rejects the widows/orphans value 0 that the test sets, so the css() round-trip assertion cannot hold ;;
+          Sizzle: selector: pseudo - :lang =>
+          Chrome native querySelectorAll matches nothing for the escaped :lang() selector the test expects to match"
+          node test/seal-browser-runner.js "http://127.0.0.1:8000/test/index.html?dev"
+      after_script:
+        # Hold the job until Travis has archived the QUnit results (log lag).
+        - sh test/seal-wait-for-log.sh qunit
