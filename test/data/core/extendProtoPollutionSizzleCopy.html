@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Bundled jQuery copy: jQuery.extend( true, ... ) does not pollute Object.prototype (CVE-2019-11358)</title>
+	<script src="../../../src/sizzle/test/jquery.js"></script>
+	<script>
+		window.sizzlejQuery = jQuery.noConflict( true );
+	</script>
+</head>
+<body>
+	<script>
+		function polluted( $, payload ) {
+			var result;
+
+			$.extend( true, {}, JSON.parse( payload ) );
+			result = "devMode" in {};
+
+			// Clean up so the next check starts from a pristine Object.prototype
+			delete Object.prototype.devMode;
+			return result;
+		}
+
+		function check( $ ) {
+			var merged = $.extend( true, {}, { a: { b: 1 } }, { a: { c: 2 } } );
+
+			return {
+				version: $.fn.jquery,
+				polluted: polluted( $, "{\"__proto__\": {\"devMode\": true}}" ),
+				nestedPolluted: polluted( $, "{\"a\": {\"__proto__\": {\"devMode\": true}}}" ),
+				deepMerge: merged.a.b === 1 && merged.a.c === 2
+			};
+		}
+
+		window.parent.iframeCallback( check( window.sizzlejQuery ) );
+	</script>
+</body>
+</html>
