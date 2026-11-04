@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Bundled jQuery copy: &lt;option&gt;/&lt;optgroup&gt; HTML isn't parsed inside a &lt;select&gt; wrapper (gh-4647)</title>
+	<script src="../../../src/sizzle/test/jquery.js"></script>
+	<script>
+		window.sizzlejQuery = jQuery.noConflict( true );
+	</script>
+</head>
+<body>
+	<script>
+		// Sanitized markup that only becomes dangerous inside a <select> wrapper:
+		// the stray </select> closes the wrapper and the rest is re-parsed.
+		// "xss(#)" is swapped for a per-payload index.
+		var templates = [
+				"<option><style></option></select><img src=url404 onerror=xss(#)></style>",
+				"<optgroup><style></optgroup></select><img src=url404 onerror=xss(#)></style>",
+				"<option><xmp></option></select><img src=url404 onerror=xss(#)></xmp>",
+
+				// Inert where it is inserted: the CDATA section stays text inside the <svg>.
+				// Inside a <select> wrapper the stray </select> also closes the <svg>, so the
+				// CDATA turns into a bogus comment that ends at the first ">".
+				"<option><svg></select><![CDATA[ > <img src=url404 onerror=xss(#)> ]]></option>",
+				"<optgroup><svg></select><![CDATA[ > <img src=url404 onerror=xss(#)> ]]></optgroup>"
+			],
+			probe = document.createElement( "div" ),
+			result;
+
+		// Support: IE 9
+		// IE 9 replaces <option> tags with their contents when inserted outside of
+		// the select element, so the select wrapper is still required there.
+		probe.innerHTML = "<option></option>";
+
+		function nodeNames( nodes ) {
+			var names = [],
+				i;
+
+			for ( i = 0; i < nodes.length; i++ ) {
+				names.push( nodes[ i ].nodeName.toLowerCase() );
+			}
+			return names.join( "," );
+		}
+
+		function check( $ ) {
+			var container, methods, i, j, payload,
+				counter = 0,
+				result = {
+					version: $.fn.jquery,
+					optionParses: !!probe.lastChild,
+					supportOption: $.support.option,
+					payloads: [],
+					executed: []
+				};
+
+			window.xss = function( index ) {
+				result.executed.push( result.payloads[ index ] );
+			};
+
+			result.jQueryNodes = nodeNames( $( "<option>a</option></select><b>b</b>" ) );
+			result.parseHTMLNodes = nodeNames( $.parseHTML( "<optgroup label='g'></optgroup></select><b>b</b>" ) );
+			result.htmlChildren = nodeNames( $( "<div></div>" ).html( "<option>a</option></select><b>b</b>" ).children() );
+			result.appendChildren = nodeNames( $( "<div></div>" ).append( "<optgroup label='g'></optgroup></select><b>b</b>" ).children() );
+
+			// <option> markup still works where it is meant to go
+			result.selectOptions = $( "<select></select>" ).append( "<option>1</option><option>2</option>" ).children( "option" ).length;
+
+			container = $( "<div></div>" ).appendTo( document.body );
+			methods = [
+				[ "html", function( html ) {
+					$( "<div></div>" ).appendTo( container ).html( html );
+				} ],
+				[ "append", function( html ) {
+					$( "<div></div>" ).appendTo( container ).append( html );
+				} ],
+				[ "prepend", function( html ) {
+					$( "<div></div>" ).appendTo( container ).prepend( html );
+				} ],
+				[ "before", function( html ) {
+					$( "<div></div>" ).appendTo( container ).before( html );
+				} ],
+				[ "after", function( html ) {
+					$( "<div></div>" ).appendTo( container ).after( html );
+				} ],
+				[ "jQuery", function( html ) {
+					$( html );
+				} ],
+				[ "jQuery.parseHTML", function( html ) {
+					$.parseHTML( html );
+				} ]
+			];
+
+			for ( i = 0; i < templates.length; i++ ) {
+				for ( j = 0; j < methods.length; j++ ) {
+					payload = templates[ i ].replace( "#", counter );
+					result.payloads.push( methods[ j ][ 0 ] + "( " + payload + " )" );
+					methods[ j ][ 1 ]( payload );
+					counter++;
+				}
+			}
+
+			return result;
+		}
+
+		result = check( window.sizzlejQuery );
+
+		// Give the url404 images time to fail and fire any injected onerror handler
+		setTimeout(function() {
+			window.parent.iframeCallback( result );
+		}, 1000 );
+	</script>
+</body>
+</html>
